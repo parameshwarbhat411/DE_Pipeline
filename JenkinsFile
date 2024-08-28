@@ -1,10 +1,14 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_WRAPPER = '/usr/local/bin/jenkins-docker'
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', credentialsId: "parameshwarbhat411", url: 'https://github.com/parameshwarbhat411/DE_Pipeline.git'
+                git branch: 'main', credentialsId: 'your-credentials-id', url: 'https://github.com/parameshwarbhat411/DE_Pipeline.git'
             }
         }
 
@@ -12,7 +16,8 @@ pipeline {
             steps {
                 script {
                     docker.image('python:3.10').inside {
-                        sh 'pip install -r scripts/requirements.txt'
+                        sh "${DOCKER_WRAPPER} pull python:3.10"
+                        sh 'pip install -r requirements.txt'  // Ensure the path to requirements.txt is correct
                     }
                 }
             }
@@ -20,9 +25,10 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                script {  // Corrected 'scripts' to 'script'
+                script {
                     docker.image('python:3.10').inside {
-                        sh 'python -m unittest discover -s scripts'
+                        sh "${DOCKER_WRAPPER} pull python:3.10"
+                        sh 'python -m unittest discover -s scripts'  // Ensure the path to your tests is correct
                     }
                 }
             }
@@ -30,9 +36,10 @@ pipeline {
 
         stage('Run ETL') {
             steps {
-                script {  // Corrected 'scripts' to 'script'
+                script {
                     docker.image('python:3.10').inside {
-                        sh 'python scripts/etl.py'  // Added .py extension assuming it's a Python script
+                        sh "${DOCKER_WRAPPER} pull python:3.10"
+                        sh 'python scripts/etl.py'  // Ensure the path to your ETL script is correct
                     }
                 }
             }
