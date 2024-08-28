@@ -1,43 +1,42 @@
-pipeline{
+pipeline {
     agent any
 
-    stages{
-        stage('Checkout'){
-            steps{
-                git branch:'main', credentialsId:"parameshwarbhat411", url: 'https://github.com/parameshwarbhat411/DE_Pipeline.git'
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', credentialsId: "parameshwarbhat411", url: 'https://github.com/parameshwarbhat411/DE_Pipeline.git'
             }
         }
 
-        stage('Install Dependencies'){
+        stage('Install Dependencies') {
             steps {
-                scripts {
+                script {
                     docker.image('python:3.10').inside {
-                    sh 'pip install -r requiements.txt'
-                   }
+                        sh 'pip install -r scripts/requirements.txt'
+                    }
                 }
             }
         }
 
-        stage('Run Tests'){
+        stage('Run Tests') {
             steps {
-                scripts {
+                script {  // Corrected 'scripts' to 'script'
                     docker.image('python:3.10').inside {
-                    sh 'python -m unittest discover -s scripts'
-                   }
+                        sh 'python -m unittest discover -s scripts'
+                    }
                 }
             }
         }
 
-        stage('Run ETL'){
+        stage('Run ETL') {
             steps {
-                scripts {
+                script {  // Corrected 'scripts' to 'script'
                     docker.image('python:3.10').inside {
-                    sh 'python scripts/etl'
-                   }
+                        sh 'python scripts/etl.py'  // Added .py extension assuming it's a Python script
+                    }
                 }
             }
         }
-
     }
 
     post {
@@ -45,5 +44,4 @@ pipeline{
             archiveArtifacts artifacts: '**/*.csv', allowEmptyArchive: true
         }
     }
-
 }
