@@ -17,7 +17,7 @@ pipeline {
                 script {
                     docker.image('python:3.10').inside {
                         sh "${DOCKER_WRAPPER} pull python:3.10"
-                        sh 'pip install -r requirements.txt'  // Ensure the path to requirements.txt is correct
+                        sh 'pip install -r scripts/requirements.txt'  // Ensure the path to requirements.txt is correct
                     }
                 }
             }
