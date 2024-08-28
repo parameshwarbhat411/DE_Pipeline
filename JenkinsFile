@@ -1,0 +1,49 @@
+pipeline{
+    agent any
+
+    stages{
+        stage('Checkout'){
+            steps{
+                git branch:'main', credentialsId:"parameshwarbhat411", url: 'https://github.com/parameshwarbhat411/DE_Pipeline.git'
+            }
+        }
+
+        stage('Install Dependencies'){
+            steps {
+                scripts {
+                    docker.image('python:3.10').inside {
+                    sh 'pip install -r requiements.txt'
+                   }
+                }
+            }
+        }
+
+        stage('Run Tests'){
+            steps {
+                scripts {
+                    docker.image('python:3.10').inside {
+                    sh 'python -m unittest discover -s scripts'
+                   }
+                }
+            }
+        }
+
+        stage('Run ETL'){
+            steps {
+                scripts {
+                    docker.image('python:3.10').inside {
+                    sh 'python scripts/etl'
+                   }
+                }
+            }
+        }
+
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: '**/*.csv', allowEmptyArchive: true
+        }
+    }
+
+}
