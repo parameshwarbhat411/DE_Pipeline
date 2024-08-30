@@ -31,6 +31,7 @@ def transform_data(data):
     return transformed
 
 def load_data(transformed):
+    # Create a temporary file to store the transformed data
     with tempfile.NamedTemporaryFile(mode="w", newline="", delete=False, suffix=".csv") as temp_file:
         writer = csv.DictWriter(temp_file, fieldnames=["id", "sensor_id", "temperature", "humidity", "recorded_at"])
         writer.writeheader()
@@ -39,9 +40,12 @@ def load_data(transformed):
         # Get the name of the temporary file
         temp_file_name = temp_file.name
 
+    # Determine the MinIO host based on the environment
+    minio_host = "host.docker.internal:9000" if os.environ.get("RUNNING_IN_DOCKER") else "localhost:9000"
+
     # Initialize MinIO client
     minio_client = Minio(
-        "localhost:9000",
+        minio_host,
         access_key="admin",
         secret_key="password",
         secure=False

@@ -84,7 +84,11 @@ class TestETLProcess(unittest.TestCase):
     @patch('os.remove')
     @patch('os.stat')
     @patch('etl.Minio')
-    def test_load_data(self, mock_minio, mock_stat, mock_remove, mock_tempfile, mock_open):
+    @patch('os.environ.get')
+    def test_load_data(self, mock_getenv, mock_minio, mock_stat, mock_remove, mock_tempfile, mock_open):
+        # Mock the environment to simulate running inside Docker or not
+        mock_getenv.return_value = None  # Simulate not running inside Docker
+
         # Mock temp file
         mock_temp = MagicMock()
         mock_temp.name = 'tempfile.csv'
@@ -109,7 +113,7 @@ class TestETLProcess(unittest.TestCase):
         mock_tempfile.assert_called_once_with(mode="w", newline="", delete=False, suffix=".csv")
         mock_stat.assert_called_once_with('tempfile.csv')
         mock_minio.assert_called_once_with(
-            "localhost:9000",
+            "localhost:9000",  # Since RUNNING_IN_DOCKER is not set
             access_key="admin",
             secret_key="password",
             secure=False
@@ -122,6 +126,20 @@ class TestETLProcess(unittest.TestCase):
             content_type="application/csv"
         )
         mock_remove.assert_called_once_with('tempfile.csv')
+
+        # Now simulate running inside Docker
+        mock_getenv.return_value = "1"  # Simulate running inside Docker
+
+        # Run the function again
+        load_data(transformed)
+
+        # Assert that the host is now "host.docker.internal:9000"
+        mock_minio.assert_called_with(
+            "host.docker.internal:9000",  # Since RUNNING_IN_DOCKER is set
+            access_key="admin",
+            secret_key="password",
+            secure=False
+        )
 
 if __name__ == "__main__":
     unittest.main()
