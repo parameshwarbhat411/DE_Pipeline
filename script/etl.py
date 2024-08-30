@@ -8,7 +8,7 @@ import os
 from minio.error import S3Error
 
 def extract_data():
-    conn = psycopg2.connect(host="postgres-db", dbname="data_engineering", user="postgres", password="password", port= 5432)
+    conn = psycopg2.connect(host="localhost", dbname="data_engineering", user="postgres", password="password", port= 5432)
     cursor = conn.cursor()
     cursor.execute("Select * from sensor_data;")
     data = cursor.fetchall()
