@@ -9,7 +9,37 @@ from etl import extract_data, transform_data, load_data
 class TestETLProcess(unittest.TestCase):
 
     @patch('psycopg2.connect')
-    def test_extract_data(self, mock_connect):
+    @patch('os.environ.get')
+    def test_extract_data(self, mock_getenv, mock_connect):
+        # Simulate running inside Docker by setting the environment variable
+        mock_getenv.return_value = "RUNNING_IN_DOCKER"
+
+        # Set up mock cursor and connection
+        mock_conn = MagicMock()
+        mock_cursor = mock_conn.cursor.return_value
+        mock_cursor.fetchall.return_value = [
+            (1, 101, 22.5, 60.1, "2023-01-01 10:00:00"),
+            (2, 102, 23.0, 61.2, "2023-01-01 11:00:00"),
+        ]
+        mock_connect.return_value = mock_conn
+
+        # Run the function
+        data = extract_data()
+
+        # Assertions
+        mock_connect.assert_called_once_with(
+            host="host.docker.internal", dbname="data_engineering", user="postgres", password="password", port=5432
+        )
+        mock_cursor.execute.assert_called_once_with("Select * from sensor_data;")
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0], (1, 101, 22.5, 60.1, "2023-01-01 10:00:00"))
+
+    @patch('psycopg2.connect')
+    @patch('os.environ.get')
+    def test_extract_data_local(self, mock_getenv, mock_connect):
+        # Simulate running locally by not setting the environment variable
+        mock_getenv.return_value = None
+
         # Set up mock cursor and connection
         mock_conn = MagicMock()
         mock_cursor = mock_conn.cursor.return_value
