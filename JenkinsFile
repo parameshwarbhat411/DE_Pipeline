@@ -11,8 +11,12 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 script {
-                    docker.image('python:3.10').inside {
-                        sh 'pip install -r scripts/requirements.txt'
+                    docker.image('python:3.10').inside('--network my-network') {
+                        sh '''
+                            python -m venv venv
+                            . venv/bin/activate
+                            pip install -r script/requirements.txt
+                        '''
                     }
                 }
             }
@@ -20,9 +24,12 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                script {  // Corrected 'scripts' to 'script'
-                    docker.image('python:3.10').inside {
-                        sh 'python -m unittest discover -s scripts'
+                script {
+                    docker.image('python:3.10').inside('--network my-network') {
+                        sh '''
+                            . venv/bin/activate
+                            python -m unittest discover -s script
+                        '''
                     }
                 }
             }
@@ -30,9 +37,12 @@ pipeline {
 
         stage('Run ETL') {
             steps {
-                script {  // Corrected 'scripts' to 'script'
-                    docker.image('python:3.10').inside {
-                        sh 'python scripts/etl.py'  // Added .py extension assuming it's a Python script
+                script {
+                    docker.image('python:3.10').inside('--network my-network') {
+                        sh '''
+                            . venv/bin/activate
+                            python script/etl.py
+                        '''
                     }
                 }
             }
