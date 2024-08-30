@@ -24,7 +24,7 @@ class TestETLProcess(unittest.TestCase):
 
         # Assertions
         mock_connect.assert_called_once_with(
-            host="localhost", dbname="data_engineering", user="postgres", password="password", port=5432
+            host="postgres-db", dbname="data_engineering", user="postgres", password="password", port=5432
         )
         mock_cursor.execute.assert_called_once_with("Select * from sensor_data;")
         self.assertEqual(len(data), 2)

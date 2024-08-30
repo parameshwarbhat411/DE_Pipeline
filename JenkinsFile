@@ -1,10 +1,14 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_WRAPPER = '/usr/local/bin/jenkins-docker'
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', credentialsId: "parameshwarbhat411", url: 'https://github.com/parameshwarbhat411/DE_Pipeline.git'
+                git branch: 'main', credentialsId: 'your-credentials-id', url: 'https://github.com/parameshwarbhat411/DE_Pipeline.git'
             }
         }
 
